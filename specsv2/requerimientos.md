@@ -6,6 +6,13 @@
 | RF-04 | SCRUM-9 | El sistema debe informar al PAS el resultado de la cotización, indicando el importe final a pagar o el motivo de rechazo. [NEEDS CLARIFICATION: deben definirse los impuestos, tasas y gastos que integran el importe final. Deciden Gerencia Comercial y Gerencia Técnica.] | Usuario / Funcional | Caso §3.1; Acta §3.4; hallazgo E1-2 | Una cotización válida muestra un importe final y una rechazada muestra el motivo. La composición exacta del importe queda pendiente hasta la decisión. |
 | RF-05 | SCRUM-10 | El sistema debe informar al PAS el resultado de la cotización, indicando el importe final a pagar o el motivo de rechazo. [NEEDS CLARIFICATION: deben definirse los impuestos, tasas y gastos que integran el importe final. Deciden Gerencia Comercial y Gerencia Técnica.] | Usuario/Funcional | Caso §3.1; Acta §3.4; hallazgo E1-2 | Pendiente: luego de definirse la regla, se combinan las condiciones de descuento y se comprueba que el porcentaje aplicado coincida con la política aprobada. |
 
+Hallazgo nuevo contra el oráculo
+E2-1 - Acumulación de descuentos
+
+| Qué se observó | Dónde | Resultado | Decisor
+| --- | --- | --- | --- |
+| E2-1 | El Cotizador v4.2 suma en B24 los descuentos por débito automático, multipóliza y antigüedad >5 años. Los valores configurados son 5%, 10% y 5%; si se cumplen las tres condiciones, la fórmula suma 20%. | Cotizador Pampa v4.2.xlsx: Cotizador!B24 y Tarifas!B39:B41 | Pendiente de decisión: coincide con Julián Ponce (“se suman”) y contradice a Héctor Vidal (“están topeados”). | Gerencia Comercial / Marcela Duarte |
+
 #Fragmentos que no son requerimientos
 
 | Fragmento | Texto resumido | Categoria | Justificacion |
