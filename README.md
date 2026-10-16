@@ -1,6 +1,8 @@
 # sist-de-info-ii-grupo9
-link de jira: 
+
+link de jira:
 https://incardonag10.atlassian.net/jira/software/projects/SCRUM/development?severity=CRITICAL%2CHIGH&tab=CONNECTIONS
+
 
 //
 
