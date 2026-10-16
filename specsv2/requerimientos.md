@@ -12,3 +12,4 @@
 | --- | --- | --- | --- |
 | Caso §2 / situación actual | SIGA no cubre cotización; los PAS usan una planilla Excel descargable. | Dato de contexto | Describe cómo funciona hoy. Justifica el problema, pero no especifica por sí sola una función del sistema nuevo. |
 | Alberto Pampín | “Sistema rápido, moderno y fácil de usar”. | RNF | Son cualidades sin una métrica concreta; no deben convertirse en RF funcionales. |
+| Alberto Pampín | “Antes de que se jubile Héctor”. | Objetivo/meta de negocio | Es un plazo/objetivo del proyecto, no una función del sistema. |
