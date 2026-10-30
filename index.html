@@ -12,6 +12,7 @@
     .layout{display:grid;grid-template-columns:1.2fr 1fr;gap:24px;align-items:start}.card{background:white;border:1px solid var(--line);border-radius:12px;padding:24px}fieldset{border:0;padding:0;margin:0 0 24px}legend{font-weight:650;margin-bottom:12px}.fields{display:grid;grid-template-columns:1fr 1fr;gap:16px}label{display:block;font-size:14px;font-weight:600}input,select{display:block;width:100%;padding:11px 12px;margin-top:5px;border:1px solid #a6b7bc;border-radius:6px;background:white;color:var(--ink);font:inherit}input:focus,select:focus,button:focus-visible{outline:3px solid #b8dbce;outline-offset:2px}
     button{background:var(--accent);color:white;font:600 16px system-ui;border:0;border-radius:6px;padding:13px 20px;cursor:pointer;width:100%}.note{font-size:13px;color:var(--muted);margin:12px 0 0}.result{padding:15px;border-left:4px solid var(--accent);background:#edf5f0;margin-bottom:18px}.result.rejected{border-color:#a3322a;background:#fff1ef}.result.pending{border-color:#a27318;background:#fff8e9}.amount{display:block;font-size:30px;font-weight:700;margin:7px 0}.label{font-size:13px;color:var(--muted)}dl{margin:0}dl>div{display:flex;justify-content:space-between;gap:16px;padding:8px 0;border-bottom:1px solid #e7eceb}dt{color:var(--muted);font-size:14px}dd{margin:0;font-weight:600;text-align:right;font-size:14px}details{margin-top:16px}summary{cursor:pointer;font-weight:600;font-size:14px}details p{font-size:13px;color:var(--muted);margin:10px 0 0}#empty{color:var(--muted)}footer{margin-top:20px;color:var(--muted);font-size:13px}[hidden]{display:none!important}
     @media(max-width:760px){.layout{grid-template-columns:1fr}main{padding:24px 16px}.card{padding:20px}.fields{grid-template-columns:1fr}h1{font-size:26px}}
+    .controls{margin-bottom:24px}.controls label{max-width:310px}.secondary{background:white;color:var(--accent);border:1px solid var(--accent);margin-top:12px}.feedback{margin:12px 0;font-size:14px}#quote-picker{margin-bottom:18px}#emission{margin-bottom:18px}.test-tariff{margin-top:24px}#accept-message{white-space:normal}dd{min-width:0;overflow-wrap:anywhere}
   </style>
 </head>
 <body>
@@ -19,6 +20,11 @@
   <main>
     <h1>Realizar cotización</h1>
     <p class="intro">Registrá los datos del riesgo para validar su antigüedad y calcular la prima antes de descuentos.</p>
+    <section class="card controls" aria-label="Fecha de prueba">
+      <label>Fecha para emitir y consultar (simulación)<input id="reference-date" type="date" min="1900-01-01" max="9999-12-31" required></label>
+      <p class="note">Control de prueba E4. Emití el 01/11/2026 y consultá el 10/11 (vigente) o el 17/11 (vencida). El corte exacto de los 15 días sigue pendiente.</p>
+      <p class="note" id="active-tariff"></p>
+    </section>
     <div class="layout">
       <form id="quote-form" class="card">
         <fieldset><legend>Vehículo y conductor</legend><div class="fields">
@@ -34,20 +40,42 @@
           <label>Otra póliza vigente<select name="otraPoliza" required><option value="">Seleccionar</option><option value="SI">Sí</option><option value="NO">No</option></select></label>
           <label>Antigüedad como cliente (años)<input name="antiguedad" type="number" min="0" step="1" required></label>
         </div></fieldset>
-        <button type="submit">Registrar y calcular</button>
-        <p class="note">Se conserva la última solicitud durante esta sesión. Al cerrar o recargar la página, los datos se eliminan.</p>
+        <button type="submit">Registrar y calcular nueva cotización</button>
+        <p id="form-feedback" class="feedback" role="status"></p>
+        <p class="note">Se conservan las cotizaciones de prueba durante esta sesión. Al cerrar o recargar la página, los datos se eliminan. Cada cálculo genera una referencia nueva.</p>
       </form>
       <section class="card" aria-labelledby="result-title">
         <h2 id="result-title">Resultado</h2>
+        <label>Cotizaciones de esta sesión<select id="quote-picker" disabled><option value="">Seleccionar cotización</option></select></label>
         <p id="empty">Completá los nueve datos para consultar el resultado.</p>
         <div id="result" hidden aria-live="polite">
           <div id="notice" class="result"><strong id="status"></strong><p id="message" class="note"></p><div id="price" hidden><span class="amount" id="amount"></span><span class="label">Prima del riesgo antes de descuentos</span></div></div>
+          <dl id="emission"></dl>
           <h2>Datos registrados</h2><dl id="registered"></dl>
           <details id="breakdown" hidden><summary>Detalle del cálculo</summary><p id="factors"></p></details>
         </div>
+        <div id="accept-controls" hidden>
+          <button id="accept-quote" type="button">Aceptar cotización (prueba de vigencia)</button>
+          <p id="accept-message" class="feedback" role="status"></p>
+        </div>
+        <button id="new-quote" class="secondary" type="button">Nueva cotización</button>
+        <p class="note">Aceptar verifica solo la continuidad por vigencia. No registra una aceptación comercial definitiva ni emite una póliza.</p>
         <details open><summary>Importes pendientes de definición</summary><p>La política de descuentos debe ser confirmada por Gerencia Comercial. Los impuestos, tasas y gastos del importe final requieren definición de Gerencia Comercial y Gerencia Técnica. El cálculo mostrado no constituye el precio final a pagar.</p></details>
       </section>
     </div>
+    <details class="card test-tariff"><summary>Prueba de cambio de tarifa</summary>
+      <p class="note">Valores de ensayo para SCRUM-13. REF-v4.2 identifica la referencia del Excel; no acredita una versión comercial aprobada. Cambiar estos valores solo afecta a las nuevas cotizaciones. No se alteran los factores de riesgo.</p>
+      <form id="tariff-form">
+        <div class="fields">
+          <label>Versión de tarifa de prueba<input name="version" value="REF-v4.2" maxlength="60" required></label>
+          <label>Prima base RC<input name="RC" type="number" min="0.01" step="0.01" value="18000" required></label>
+          <label>Prima base TC<input name="TC" type="number" min="0.01" step="0.01" value="32000" required></label>
+          <label>Prima base TR<input name="TR" type="number" min="0.01" step="0.01" value="58000" required></label>
+        </div>
+        <button class="secondary" type="submit">Usar tarifa de prueba para nuevas cotizaciones</button>
+        <p id="tariff-message" class="feedback" role="status"></p>
+      </form>
+    </details>
     <footer>Tarifas de referencia: Cotizador Pampa v4.2 · Año de cálculo: <span id="calculation-year"></span>.</footer>
   </main>
   <script>
@@ -63,11 +91,21 @@
       siniestros: { 0: .9, 1: 1, 2: 1.25 },
       sinGaraje: 1.1
     };
-    const year = Number(new Intl.DateTimeFormat('en', {timeZone:'America/Argentina/Buenos_Aires',year:'numeric'}).format(new Date()));
-    const form = document.getElementById('quote-form');
-    form.elements.anio.max = year;
-    document.getElementById('calculation-year').textContent = year;
-    let solicitudActual = null;
+    // SCRUM-13: snapshots de prueba, separados de la tarifa activa.
+    // No se implementa renovación ni se decide el corte exacto de los 15 días.
+    const $ = id => document.getElementById(id);
+    const todayParts = new Intl.DateTimeFormat('en', {
+      timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit'
+    }).formatToParts(new Date());
+    const part = type => todayParts.find(value => value.type === type).value;
+    $('reference-date').value = `${part('year')}-${part('month')}-${part('day')}`;
+    const form = $('quote-form');
+    const clock = $('reference-date');
+    const picker = $('quote-picker');
+    const tariffForm = $('tariff-form');
+    const quotes = [];
+    let activeTariff = Object.freeze({version:'REF-v4.2',base:Object.freeze({...tarifas.base})});
+    const versions = new Map([[activeTariff.version, JSON.stringify(activeTariff.base)]]);
     const fields = [
       ['cobertura','Cobertura'], ['edad','Edad del conductor habitual'], ['anio','Año del vehículo'],
       ['zona','Zona de radicación'], ['siniestros','Siniestros en los últimos 24 meses'],
@@ -76,48 +114,136 @@
     ];
     const threshold = (rows, value) => rows.filter(([from]) => value >= from).at(-1)?.[1];
     const money = value => new Intl.NumberFormat('es-AR',{style:'currency',currency:'ARS',minimumFractionDigits:2,maximumFractionDigits:2}).format(value);
-    form.addEventListener('input', () => {
-      // A changed form must not leave a previous quote looking current.
-      document.getElementById('result').hidden = true;
-      document.getElementById('empty').hidden = false;
-      document.getElementById('empty').textContent = 'Los datos cambiaron. Registrá la solicitud para actualizar el resultado.';
-    });
-    form.addEventListener('submit', event => {
-      event.preventDefault();
-      if (!form.reportValidity()) return;
-      const data = Object.fromEntries(new FormData(form));
-      for (const name of ['edad','anio','siniestros','antiguedad']) data[name] = Number(data[name]);
-      solicitudActual = Object.freeze({...data});
-      const list = document.getElementById('registered');list.replaceChildren();
-      for (const [key,label] of fields) {
+    const dateLabel = value => value.split('-').reverse().join('/');
+    const dayNumber = value => {
+      const [y,m,d] = value.split('-').map(Number);
+      return Date.UTC(y,m-1,d)/86400000;
+    };
+    function dateValid() { return clock.checkValidity(); }
+    function updateYear() {
+      const year = dateValid() ? Number(clock.value.slice(0,4)) : '';
+      form.elements.anio.max = year;
+      $('calculation-year').textContent = year || 'fecha de prueba inválida';
+    }
+    function showTariff() {
+      $('active-tariff').textContent = 'Tarifa de prueba activa: '+activeTariff.version+
+        ' · RC '+money(activeTariff.base.RC)+' · TC '+money(activeTariff.base.TC)+' · TR '+money(activeTariff.base.TR)+'.';
+    }
+    function rows(target, values) {
+      target.replaceChildren();
+      for (const [label,value] of values) {
         const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');
-        dt.textContent=label;dd.textContent=data[key]==='SI'?'Sí':data[key]==='NO'?'No':String(data[key]);
-        row.append(dt,dd);list.append(row);
+        dt.textContent=label; dd.textContent=String(value); row.append(dt,dd); target.append(row);
       }
-      document.getElementById('empty').hidden=true;
-      document.getElementById('result').hidden=false;
-      const notice=document.getElementById('notice'),status=document.getElementById('status'),message=document.getElementById('message');
-      document.getElementById('price').hidden=true;document.getElementById('breakdown').hidden=true;
-      notice.className='result';
+    }
+    function showData(data) {
+      rows($('registered'),fields.map(([key,label])=>[label,data[key]==='SI'?'Sí':data[key]==='NO'?'No':data[key]]));
+    }
+    function temporal(quote) {
+      if (!dateValid()) return {kind:'pending',title:'Fecha de consulta inválida',reason:'Ingresá una fecha de prueba válida.'};
+      const days = dayNumber(clock.value)-dayNumber(quote.issuedOn);
+      if (days < 0) return {kind:'pending',title:'Consulta anterior a la emisión',reason:'La fecha de consulta no puede ser anterior a la emisión de esta cotización.'};
+      if (days === 15) return {kind:'pending',title:'Pendiente de definición',reason:'No se autoriza continuar: el corte exacto de los 15 días no está definido. Debe confirmarlo Gerencia Comercial.'};
+      if (days > 15) return {kind:'expired',title:'Vencida',reason:'No puede aceptarse: la cotización está vencida. Para continuar, realizá una nueva cotización con la tarifa vigente.'};
+      return {kind:'valid',title:'Vigente',reason:'Dentro del período de vigencia. Se conserva la prima parcial y la versión de tarifa originales.'};
+    }
+    function selectedQuote() { return quotes.find(quote=>String(quote.id)===picker.value); }
+    function showResult(title,message,kind='pending') {
+      $('empty').hidden=true; $('result').hidden=false;
+      $('notice').className='result '+(kind==='expired'?'rejected':kind);
+      $('status').textContent=title; $('message').textContent=message;
+      $('accept-message').textContent='';
+    }
+    function renderQuote(quote) {
+      const state=temporal(quote);
+      showResult(state.title+' · cálculo parcial',state.reason,state.kind==='valid'?'':state.kind);
+      showData(quote.data);
+      rows($('emission'),[
+        ['Referencia de prueba','#'+quote.id],['Fecha de emisión',dateLabel(quote.issuedOn)],
+        ['Versión de tarifa de prueba',quote.tariffVersion],['Validez','15 días corridos; corte exacto pendiente']
+      ]);
+      $('price').hidden=false; $('amount').textContent=money(quote.amount);
+      $('breakdown').hidden=false; $('factors').textContent=quote.breakdown;
+      $('accept-controls').hidden=false;
+    }
+    function clearSelection() {
+      picker.value=''; $('result').hidden=true; $('empty').hidden=false;
+      $('accept-controls').hidden=true; $('accept-message').textContent='';
+    }
+    form.addEventListener('input',()=>{
+      $('form-feedback').textContent='Datos editados. Registrar genera una nueva cotización; las anteriores conservan sus datos e importe.';
+    });
+    form.addEventListener('submit',event=>{
+      event.preventDefault();
+      updateYear();
+      if (!clock.reportValidity() || !form.reportValidity()) return;
+      const data=Object.fromEntries(new FormData(form));
+      for (const name of ['edad','anio','siniestros','antiguedad']) data[name]=Number(data[name]);
+      const year=Number(clock.value.slice(0,4));
+      clearSelection(); showData(data); $('emission').replaceChildren();
+      $('price').hidden=true; $('breakdown').hidden=true;
       if (year-data.anio>20) {
-        notice.classList.add('rejected');status.textContent='Cotización rechazada';
-        message.textContent='El vehículo tiene '+(year-data.anio)+' años. Se rechazan vehículos de más de 20 años para RC, TC y TR.';
+        showResult('Cotización rechazada','El vehículo tiene '+(year-data.anio)+' años. Se rechazan vehículos de más de 20 años para RC, TC y TR.','expired');
+        $('form-feedback').textContent='Solicitud rechazada. No se generó una cotización aceptable.';
         return;
       }
       const factors=[threshold(tarifas.edad,data.edad),threshold(tarifas.vehiculo,year-data.anio),tarifas.zona[data.zona],tarifas.siniestros[data.siniestros],data.garaje==='NO'&&['CABA','GBA'].includes(data.zona)?tarifas.sinGaraje:1];
       if (factors.some(value=>!Number.isFinite(value))) {
-        notice.classList.add('pending');status.textContent='Validación pendiente';
-        message.textContent='No hay un factor tarifario confirmado para esta edad o cantidad de siniestros. Debe confirmarse la regla de aceptación y tarifación. No se emite un rechazo comercial automático.';
+        showResult('Validación pendiente','No hay un factor tarifario confirmado para esta edad o cantidad de siniestros. Debe confirmarse la regla de aceptación y tarifación. No se emite un rechazo comercial automático.');
+        $('form-feedback').textContent='No se generó una cotización aceptable: falta confirmar la tarifación.';
         return;
       }
-      const base=tarifas.base[data.cobertura];
+      const base=activeTariff.base[data.cobertura];
       const amount=factors.reduce((total,factor)=>total*factor,base);
-      notice.classList.add('pending');status.textContent='Cálculo parcial disponible';
-      message.textContent='Datos registrados. La prima del riesgo se calculó con las tarifas de referencia. El resultado comercial completo queda pendiente de las definiciones de descuentos e importe final.';
-      document.getElementById('amount').textContent=money(amount);
-      document.getElementById('price').hidden=false;document.getElementById('breakdown').hidden=false;
-      document.getElementById('factors').textContent='Base '+money(base)+' × edad '+factors[0]+' × antigüedad del vehículo '+factors[1]+' × zona '+factors[2]+' × siniestralidad '+factors[3]+' × guarda '+factors[4]+'. No se aplican descuentos, impuestos, tasas ni gastos pendientes de definición.';
+      if (!Number.isFinite(amount)) {
+        showResult('Cálculo no disponible','Los valores de prueba exceden el rango de cálculo. Revisá la tarifa de prueba.');
+        return;
+      }
+      const quote=Object.freeze({id:quotes.length+1,issuedOn:clock.value,tariffVersion:activeTariff.version,
+        data:Object.freeze({...data}),amount,
+        breakdown:'Base '+money(base)+' × edad '+factors[0]+' × antigüedad del vehículo '+factors[1]+' × zona '+factors[2]+' × siniestralidad '+factors[3]+' × guarda '+factors[4]+'. No se aplican descuentos, impuestos, tasas ni gastos pendientes de definición.'});
+      quotes.push(quote);
+      const option=document.createElement('option'); option.value=quote.id;
+      option.textContent='#'+quote.id+' · '+dateLabel(quote.issuedOn)+' · '+quote.tariffVersion;
+      picker.append(option);picker.disabled=false;picker.value=String(quote.id);
+      renderQuote(quote);
+      $('form-feedback').textContent='Cotización de prueba #'+quote.id+' registrada con resultado parcial. Los importes comerciales pendientes siguen sin definirse.';
     });
+    clock.addEventListener('input',()=>{
+      updateYear(); const quote=selectedQuote(); if (quote) renderQuote(quote);
+    });
+    picker.addEventListener('change',()=>{
+      const quote=selectedQuote(); if (quote) renderQuote(quote); else clearSelection();
+    });
+    $('accept-quote').addEventListener('click',()=>{
+      const quote=selectedQuote(); if (!quote) return;
+      renderQuote(quote); // Siempre consulta la fecha actual de prueba; nunca recalcula el importe.
+      const state=temporal(quote);
+      $('accept-message').textContent=state.kind==='valid'
+        ? 'Puede continuar por vigencia. Prueba temporal superada; el precio sigue siendo parcial. No se registra una aceptación comercial definitiva ni se emite una póliza.'
+        : 'Aceptación bloqueada. '+state.reason;
+    });
+    $('new-quote').addEventListener('click',()=>{
+      form.reset(); clearSelection(); updateYear();
+      $('empty').textContent='Completá los nueve datos para generar una nueva cotización con la tarifa activa.';
+      $('form-feedback').textContent='Nueva solicitud vacía. No se reutilizaron datos de otra cotización.';
+      form.elements.cobertura.focus();
+    });
+    tariffForm.addEventListener('submit',event=>{
+      event.preventDefault(); if (!tariffForm.reportValidity()) return;
+      const version=tariffForm.elements.version.value.trim();
+      const base=Object.fromEntries(['RC','TC','TR'].map(key=>[key,Number(tariffForm.elements[key].value)]));
+      const signature=JSON.stringify(base);
+      if (!version || Object.values(base).some(value=>!Number.isFinite(value)||value<=0)) {
+        $('tariff-message').textContent='Indicá una versión y primas base positivas válidas.'; return;
+      }
+      if (versions.has(version) && versions.get(version)!==signature) {
+        $('tariff-message').textContent='Usá una versión diferente: ese identificador ya tiene otros valores en esta sesión.'; return;
+      }
+      versions.set(version,signature); activeTariff=Object.freeze({version,base:Object.freeze(base)});
+      showTariff(); $('tariff-message').textContent='Tarifa de prueba activa para nuevas cotizaciones. Las cotizaciones anteriores no cambian.';
+    });
+    updateYear(); showTariff();
   </script>
 </body>
 </html>
