@@ -7,7 +7,7 @@
 | RF-05 | SCRUM-10 | El sistema debe aplicar los descuentos comerciales correspondientes a la cotización. [NEEDS CLARIFICATION: Héctor Vidal indica que los descuentos están topeados y no pueden acumularse todos; Julián Ponce afirma que se suman. Decide Gerencia Comercial.] | Usuario/Funcional | Caso §3.1; Acta §3.4; hallazgo E1-2 | Pendiente: luego de definirse la regla, se combinan las condiciones de descuento y se comprueba que el porcentaje aplicado coincida con la política aprobada. |
 | RF-06 v1 | SCRUM-14 | El sistema debe determinar la vigencia de cada cotización durante los 15 días corridos establecidos desde su fecha de emisión. | Sistema / Funcional | Acta de la tercera reunión §3.1 | CA-E4-02; el límite exacto queda pendiente según la observación temporal. |
 | RF-07 v1 | SCRUM-15 | El sistema debe impedir la aceptación de una cotización vencida. | Negocio / Funcional | Acta de la tercera reunión §3.1 | CA-E4-03: el intento queda bloqueado con el motivo de vencimiento. |
-| RF-08 v1 | SCRUM-13 | Cuando se necesite continuar a partir de una cotización vencida, el sistema debe requerir la realización de una nueva cotización con la tarifa vigente al emitirla. | Sistema / Funcional | Acta de la tercera reunión §3.1 | CA-E4-05: se registra una cotización nueva, sin transformar ni sobrescribir la vencida. |
+| RF-08 v1 | SCRUM-16 | Cuando se necesite continuar a partir de una cotización vencida, el sistema debe requerir la realización de una nueva cotización con la tarifa vigente al emitirla. | Sistema / Funcional | Acta de la tercera reunión §3.1 | CA-E4-05: se registra una cotización nueva, sin transformar ni sobrescribir la vencida. |
 | RF-09 v1 | SCRUM-13 | El sistema debe conservar el precio emitido de una cotización hasta su vencimiento aunque cambie la tarifa general durante su vigencia. | Negocio / Funcional | Acta de la tercera reunión §3.1 | CA-E4-04: la cotización conserva su importe y versión originales. |
 
 ## E4 — SCRUM-13: registro del cambio
@@ -92,7 +92,7 @@ La columna Commit identifica antecedentes comprobados y el cambio E4 por su mens
 | Caso §3.1; Acta §3.4; E2-1 | SCRUM-10 | RF-05 | Cálculo referido por UC-01 | Pendiente de decisión comercial; no se afirma implementado | 3249747; sin modificación E4. |
 | Tercera reunión §3.1 | SCRUM-14; cambio SCRUM-13 | RF-06 v1 | Cotizada/Vigente → Vencida | CA-E4-02, CA-E4-03; CA-E4-07 sin resolver corte | SCRUM-14: vincula RF-06 a su issue propio; SCRUM-13: agrega control de vigencia a la página E4. |
 | Tercera reunión §3.1 | SCRUM-15; cambio SCRUM-13 | RF-07 v1 | Control posterior a UC-01 | CA-E4-02 y CA-E4-03 | SCRUM-15: vincula RF-07 a su issue propio; SCRUM-13: agrega control de vigencia a la página E4. |
-| Tercera reunión §3.1 | SCRUM-13 | RF-08 v1 | Nueva ejecución de UC-01 | CA-E4-05 | SCRUM-13: documenta vigencia y trazabilidad E4; SCRUM-13: agrega control de vigencia a la página E4. |
+| Tercera reunión §3.1 | SCRUM-16; cambio SCRUM-13 | RF-08 v1 | Nueva ejecución de UC-01 | CA-E4-05 | SCRUM-16: vincula RF-08 a su issue propio; SCRUM-13: agrega control de vigencia a la página E4. |
 | Tercera reunión §3.1 | SCRUM-13 | RF-09 v1 | Conservación de Cotizada/Vigente | CA-E4-04 | SCRUM-13: documenta vigencia y trazabilidad E4; SCRUM-13: agrega control de vigencia a la página E4. |
 
 UC-01 conserva SCRUM-11 y el antecedente 5a95b3a; su revisión se traza al commit documental SCRUM-13. La página parte de e596e5b (SCRUM-12, PR #2) y su revisión al commit de página SCRUM-13. No hay DFD versionado que pueda enlazarse a un commit de modificación.
