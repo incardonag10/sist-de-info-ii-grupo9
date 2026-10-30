@@ -20,7 +20,7 @@ E2: **Aprobada sin correcciones**. No hubo modificaciones que aplicar por esa en
 
 ### Versionado e impacto
 
-RF-01 y RF-03 pasan a v2 sin cambiar sus identificadores ni sus issues originales. RF-06 a RF-09 nacen en v1. Los RF anteriores sin versión explícita conservan su redacción vigente. Todos los cambios de esta sección corresponden a SCRUM-13.
+RF-01 y RF-03 pasan a v2 sin cambiar sus identificadores ni sus issues originales. RF-06 a RF-09 nacen en v1 con issues propios (SCRUM-14 a SCRUM-17), derivados del cambio marco SCRUM-13. Los RF anteriores sin versión explícita conservan su redacción vigente.
 
 | Elemento revisado | Impacto por SCRUM-13 |
 | --- | --- |
